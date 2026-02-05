@@ -46,6 +46,10 @@ class Grid:
             "J": J
         }
 
+        self.bag = None
+        self.bag_threshold = 1
+        self.reset_bag()
+
         self.paused = False
         self.game_over = False
         self.can_swap = True
@@ -92,6 +96,16 @@ class Grid:
                 func(self, *args, **kwargs)
         return wrapper
 
+    def reset_bag(self):
+        self.bag = list(self.pieces.keys())
+
+    def pick_from_bag(self):
+        if len(self.bag) <= self.bag_threshold:
+            self.reset_bag()
+        piece = self.bag.pop(random.randint(0, len(self.bag) - 1)) 
+        print(self.bag)
+        return piece
+
     def reset(self):
         self.add_points(-self.points)
         self.grid = self.new_grid()
@@ -100,6 +114,7 @@ class Grid:
         self.piece_holder.piece = None
         self.current_piece = None
         self.current_piece_pos = None
+        self.reset_bag()
         self.spawn_piece()
         
         self.elapsed_time = 0
@@ -229,9 +244,9 @@ class Grid:
         if self.next_piece.piece:
             self.current_piece = self.next_piece.piece
         else:
-            self.current_piece = self.pieces[random.choice(list(self.pieces.keys()))]()
+            self.current_piece = self.pieces[self.pick_from_bag()]()
 
-        self.next_piece.piece = self.pieces[random.choice(list(self.pieces.keys()))]()
+        self.next_piece.piece = self.pieces[self.pick_from_bag()]()
         self.current_piece_pos = [self.width // 2 - 1, -len(self.current_piece.matrix)]
 
     def erase_piece_matrix(self):
