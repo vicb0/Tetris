@@ -6,10 +6,12 @@ from managers.AudioManager import AudioManager
 from managers.ScreensManager import ScreensManager
 from managers.InputsManager import InputsManager
 from managers.SettingsManager import SettingsManager
+from utils.resourceUtils import resource_path
 
 
 SCREEN_TITLE = getattr(metadata, "SCREEN_TITLE", "Pygame")
-GAME_ICON_PATH = getattr(metadata, "GAME_ICON_PATH", "assets/icon.png")
+ASSETS_FOLDER = resource_path(getattr(metadata, "ASSETS_FOLDER", "assets"))
+GAME_ICON_PATH = getattr(metadata, "GAME_ICON_PATH", f"{ASSETS_FOLDER}/icon.png")
 DEFAULT_SCREEN = getattr(metadata, "DEFAULT_SCREEN", "mainmenu")
 
 

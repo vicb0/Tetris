@@ -1,7 +1,9 @@
 SCREEN_TITLE = "Tetris"
 
-GAME_ICON_PATH = "assets/icon.jpg"
+ASSETS_FOLDER = "assets"
 
 SCREENS_FOLDER = "screens"
+
+GAME_ICON_PATH =  f"{ASSETS_FOLDER}/icon.png"
 
 DEFAULT_SCREEN = "mainmenu"
