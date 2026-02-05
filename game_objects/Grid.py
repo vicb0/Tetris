@@ -102,9 +102,7 @@ class Grid:
     def pick_from_bag(self):
         if len(self.bag) <= self.bag_threshold:
             self.reset_bag()
-        piece = self.bag.pop(random.randint(0, len(self.bag) - 1)) 
-        print(self.bag)
-        return piece
+        return self.bag.pop(random.randint(0, len(self.bag) - 1)) 
 
     def reset(self):
         self.add_points(-self.points)
