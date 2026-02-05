@@ -80,9 +80,15 @@ class Grid:
         self.speed_up()
         self.spawn_piece()
 
-    def not_game_over_and_not_paused(func):
+    def not_game_over(func):
         def wrapper(self, *args, **kwargs):
-            if not self.game_over and not self.paused:
+            if not self.game_over:
+                func(self, *args, **kwargs)
+        return wrapper
+    
+    def not_paused(func):
+        def wrapper(self, *args, **kwargs):
+            if not self.paused:
                 func(self, *args, **kwargs)
         return wrapper
 
@@ -117,7 +123,8 @@ class Grid:
         self.current_piece_pos[0] = max(0, min(self.width - len(self.current_piece.matrix[0]), self.current_piece_pos[0]))
         self.current_piece_pos[1] = max(0, min(self.height - len(self.current_piece.matrix), self.current_piece_pos[1]))
 
-    @not_game_over_and_not_paused
+    @not_game_over
+    @not_paused
     def key_down_handler(self, event):
         dx, dy = 0, 0
         rotated = False
@@ -269,7 +276,8 @@ class Grid:
             self.freeze_piece()
             self.spawn_piece()
 
-    @not_game_over_and_not_paused
+    @not_game_over
+    @not_paused
     def update(self, dt):
         self.elapsed_time += dt
 
@@ -280,11 +288,10 @@ class Grid:
             for _ in range(actions):
                 self.fall_piece()
 
-    def draw(self, screen):
+    @not_paused
+    def draw_grid(self, screen):
         x_start = (screen.get_width() - self.width * self.square_size) // 2
         y_start = (screen.get_height() - self.height * self.square_size) // 2
-
-        self.points_text.draw(screen)
 
         for y, line in enumerate(self.grid):
             for x, _ in enumerate(line):
@@ -299,3 +306,7 @@ class Grid:
                     self.colors[abs(self.grid[y][x])] if self.grid[y][x] != 0 else BLACK,
                     rect
                 )
+
+    def draw(self, screen):
+        self.points_text.draw(screen)
+        self.draw_grid(screen)
