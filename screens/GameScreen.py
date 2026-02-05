@@ -1,6 +1,7 @@
 import pygame
 
 from components.Button import Button
+from components.Text import Text
 from consts.colors import *
 from game_objects.Grid import Grid
 from core.ScreenInterface import ScreenInterface
@@ -12,6 +13,9 @@ class GameScreen(ScreenInterface):
 
         self.drawables = []
         self.game_grid = None
+        self.game_over_button = None
+        self.paused_text = None
+        self.menu_button = None
 
         self.input_linker = {
             pygame.MOUSEMOTION: self.on_mouse_motion,
@@ -19,9 +23,20 @@ class GameScreen(ScreenInterface):
             pygame.KEYDOWN: self.on_key_down
         }
 
+    def on_pause(self):
+        self.game_grid.paused = not self.game_grid.paused
+        self.paused_text.set_visible(self.game_grid.paused)
+        self.menu_button.set_visible(self.game_grid.paused)
+        self.menu_button.set_enabled(self.game_grid.paused)
+
+        if self.game_grid.paused:
+            self.game.audio_manager.pause_bgm()
+        else:
+            self.game.audio_manager.resume_bgm()
+
     def on_key_down(self, event):
         if event.key == pygame.K_ESCAPE:
-            self.game.screens_manager.set_screen("mainmenu")
+            self.on_pause()
         self.game_grid.key_down_handler(event)
 
     def on_mouse_motion(self, event):
@@ -67,7 +82,7 @@ class GameScreen(ScreenInterface):
         self.drawables.append(self.game_grid.piece_holder)
         self.drawables.append(self.game_grid.speed_text)
 
-        game_over_button = Button(
+        self.game_over_button = Button(
             text="Play again",
             font=pygame.font.SysFont(None, self.game.screen.get_height() // 12),
             rect=(
@@ -76,20 +91,50 @@ class GameScreen(ScreenInterface):
                 self.game.screen.get_width() // 4,
                 self.game.screen.get_height() // 4
             ),
-            on_click=self.game_grid.reset,
+            on_click=None,
             bg=RED,
             hover_bg=DARK_RED,
-            center=True
+            center=True,
+            enabled=False,
+            visible=False
         )
 
-        prev_draw = game_over_button.draw
-        def display_game_over(screen):
-            if self.game_grid.game_over:
-                prev_draw(screen)
+        def on_click():
+            self.game_over_button.set_enabled(False)
+            self.game_over_button.set_visible(False)
+            self.game_grid.reset()
+        self.game_over_button.on_click = on_click
 
-        game_over_button.draw = display_game_over
+        self.drawables.append(self.game_over_button)
 
-        self.drawables.append(game_over_button)
+        self.paused_text = Text(
+            "Paused",
+            pygame.font.SysFont(None, self.game.screen.get_height() // 12),
+            (self.game.screen.get_width() // 2, self.game.screen.get_height() // 3),
+            YELLOW,
+            center=True,
+            visible=False
+        )
+
+        self.menu_button = Button(
+            text="Menu",
+            font=pygame.font.SysFont(None, self.game.screen.get_height() // 12),
+            rect=(
+                self.game.screen.get_width() // 2,
+                self.game.screen.get_height() // 2,
+                self.game.screen.get_width() // 4,
+                self.game.screen.get_height() // 4
+            ),
+            on_click=lambda: self.game.screens_manager.set_screen("mainmenu"),
+            bg=RED,
+            hover_bg=DARK_RED,
+            center=True,
+            enabled=False,
+            visible=False
+        )
+
+        self.drawables.append(self.paused_text)
+        self.drawables.append(self.menu_button)
 
         self.game.audio_manager.play_bgm()
 

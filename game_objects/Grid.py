@@ -46,6 +46,7 @@ class Grid:
             "J": J
         }
 
+        self.paused = False
         self.game_over = False
         self.can_swap = True
         self.points = 0
@@ -79,9 +80,9 @@ class Grid:
         self.speed_up()
         self.spawn_piece()
 
-    def not_game_over(func):
+    def not_game_over_and_not_paused(func):
         def wrapper(self, *args, **kwargs):
-            if not self.game_over:
+            if not self.game_over and not self.paused:
                 func(self, *args, **kwargs)
         return wrapper
 
@@ -116,7 +117,7 @@ class Grid:
         self.current_piece_pos[0] = max(0, min(self.width - len(self.current_piece.matrix[0]), self.current_piece_pos[0]))
         self.current_piece_pos[1] = max(0, min(self.height - len(self.current_piece.matrix), self.current_piece_pos[1]))
 
-    @not_game_over
+    @not_game_over_and_not_paused
     def key_down_handler(self, event):
         dx, dy = 0, 0
         rotated = False
@@ -210,6 +211,8 @@ class Grid:
     def check_game_over(self):
         if not self.is_y_inbound(self.current_piece_pos[1]):
             self.game_over = True
+            self.game.screens_manager.current_screen.game_over_button.set_enabled(True)
+            self.game.screens_manager.current_screen.game_over_button.set_visible(True)
             self.game.audio_manager.play_sfx("gameover")
 
     def spawn_piece(self, check_game_over=True):
@@ -266,7 +269,7 @@ class Grid:
             self.freeze_piece()
             self.spawn_piece()
 
-    @not_game_over
+    @not_game_over_and_not_paused
     def update(self, dt):
         self.elapsed_time += dt
 
